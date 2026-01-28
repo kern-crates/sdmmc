@@ -74,7 +74,6 @@ pub fn generic_fls(x: u32) -> u32 {
     }
 
     if (val & 0x80000000) == 0 {
-        val <<= 1;
         r -= 1;
     }
 

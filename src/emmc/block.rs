@@ -5,8 +5,8 @@ use core::sync::atomic::{AtomicBool, Ordering};
 
 #[cfg(feature = "dma")]
 use {
-    dma_api::DVec,
     crate::delay_us,
+    dma_api::DVec,
     log::{debug, info},
 };
 
@@ -73,6 +73,11 @@ pub struct EMmcCard {
 }
 
 impl EMmcCard {
+    /// Initialize a new EMmcCard structure
+    ///
+    /// # Arguments
+    ///
+    /// * `card_type` - Type of the card (SD, MMC, eMMC, etc.)
     pub fn init(card_type: CardType) -> Self {
         Self {
             card_type,
@@ -540,7 +545,7 @@ impl EMmcHost {
         // Write data in 4-byte chunks
         for i in (0..len).step_by(4) {
             // Pack bytes into a 32-bit word, handling potential buffer underrun
-            let mut val: u32 = (buffer[i] as u32) << 0;
+            let mut val: u32 = buffer[i] as u32;
 
             if i + 1 < len {
                 val |= (buffer[i + 1] as u32) << 8;

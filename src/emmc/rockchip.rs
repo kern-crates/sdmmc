@@ -344,7 +344,7 @@ impl EMmcHost {
             }
         }
 
-        if !(timing == MMC_TIMING_LEGACY) && (self.quirks & SDHCI_QUIRK_NO_HISPD_BIT) == 0 {
+        if (timing != MMC_TIMING_LEGACY) && (self.quirks & SDHCI_QUIRK_NO_HISPD_BIT) == 0 {
             ctrl |= EMMC_CTRL_HISPD;
         } else {
             ctrl &= !EMMC_CTRL_HISPD;

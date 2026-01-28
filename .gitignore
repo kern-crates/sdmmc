@@ -1,2 +1,4 @@
 /target
 /firmware/uboot.disk
+.qemu*
+.uboot*

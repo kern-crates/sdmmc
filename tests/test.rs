@@ -15,7 +15,7 @@ mod tests {
     };
     use dma_api::{DVec, Direction};
     use log::{info, warn};
-    use rk3588_clk::{constant::*, Rk3588Cru};
+    use rk3588_clk::{Rk3588Cru, constant::*};
     use sdmmc::emmc::EMmcHost;
     use sdmmc::emmc::constant::*;
     use sdmmc::{
@@ -45,7 +45,7 @@ mod tests {
     fn test_platform() {
         let emmc_addr_ptr = get_device_addr("rockchip,dwcmshc-sdhci");
         let clk_add_ptr = get_device_addr("rockchip,rk3588-cru");
-        
+
         info!("emmc ptr: {:p}", emmc_addr_ptr);
         info!("clk ptr: {:p}", clk_add_ptr);
 

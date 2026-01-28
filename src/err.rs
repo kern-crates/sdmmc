@@ -4,33 +4,60 @@ use core::fmt;
 
 #[derive(Debug)]
 pub enum SdError {
+    /// Command timeout
     Timeout,
+    /// Command CRC error
     Crc,
+    /// Command end bit error
     EndBit,
+    /// Command index error
     Index,
+    /// Data timeout
     DataTimeout,
+    /// Data CRC error
     DataCrc,
+    /// Data end bit error
     DataEndBit,
+    /// Bus power error
     BusPower,
+    /// Auto CMD12 error
     Acmd12Error,
+    /// ADMA error
     AdmaError,
+    /// Invalid response received
     InvalidResponse,
+    /// No card detected
     NoCard,
+    /// Unsupported card type
     UnsupportedCard,
+    /// General I/O error
     IoError,
+    /// Command execution error
     CommandError,
+    /// Data transfer error
     TransferError,
+    /// Invalid response type for command
     InvalidResponseType,
+    /// Current limit exceeded
     CurrentLimit,
+    /// General data error
     DataError,
+    /// Tuning procedure failed
     TuningFailed,
+    /// Voltage switch failed
     VoltageSwitchFailed,
+    /// Bad message format
     BadMessage,
+    /// Invalid argument provided
     InvalidArgument,
+    /// Buffer overflow occurred
     BufferOverflow,
+    /// Memory allocation or access error
     MemoryError,
+    /// Bus width configuration error
     BusWidth,
-    CardError(u32, &'static str), // 包含错误状态和描述
+    /// Card-specific error with status and description
+    CardError(u32, &'static str),
 }
 
 impl fmt::Display for SdError {

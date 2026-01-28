@@ -1,252 +1,252 @@
-# SD/MMC Driver Library 🦀
+# SD/MMC 驱动库 🦀
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2024+-orange.svg)](https://www.rust-lang.org/)
 [![Platform](https://img.shields.io/badge/platform-ARM64-green.svg)](#)
 
 
-## 📋 Table of Contents
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Quick Start](#quick-start)
-  - [Requirements](#requirements)
-  - [Installation](#installation)
-  - [Basic Usage](#basic-usage)
-- [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
-  - [Core Structures](#core-structures)
-  - [Main Interfaces](#main-interfaces)
-  - [Supported Transfer Modes](#supported-transfer-modes)
-- [Usage Examples](#usage-examples)
-- [Test Results](#test-results)
-  - [Running Tests](#running-tests)
-  - [Test Functionality Description](#test-functionality-description)
-- [Board Support](#board-support)
-- [Troubleshooting](#troubleshooting)
-  - [Common Issues](#common-issues)
-  - [Debugging Tips](#debugging-tips)
-- [License](#license)
+## 📋 目录
+- [项目简介](#项目简介)
+- [功能特性](#功能特性)
+- [快速开始](#快速开始)
+  - [环境要求](#环境要求)
+  - [安装步骤](#安装步骤)
+  - [基本使用](#基本使用)
+- [项目结构](#项目结构)
+- [API 文档](#api-文档)
+  - [核心结构体](#核心结构体)
+  - [主要接口](#主要接口)
+  - [支持的传输模式](#支持的传输模式)
+- [使用示例](#使用示例)
+- [测试结果](#测试结果)
+  - [运行测试](#运行测试)
+  - [测试功能说明](#测试功能说明)
+- [开发板支持](#开发板支持)
+- [故障排除](#故障排除)
+  - [常见问题](#常见问题)
+  - [调试技巧](#调试技巧)
+- [许可证](#许可证)
 
-## 📖 Project Overview
+## 📖 项目简介
 
-The SD/MMC Driver Library is a Rust SD/MMC controller driver library designed specifically for ARM64 platforms, supporting eMMC, SD, and SDIO devices. This library provides comprehensive storage controller functionality, including command sending, clock configuration, and block read/write operations.
+SD/MMC 驱动库是一个专为 ARM64 平台设计的 Rust SD/MMC 控制器驱动库，支持 eMMC、SD 和 SDIO 设备。该库提供了完整的存储控制器功能，包括命令发送、时钟配置、块读写操作等。
 
-This project uses a `no_std` design, making it fully suitable for bare-metal and embedded environments, with specific optimizations for the U-Boot bootloader environment. Through type-safe register access, it ensures the reliability and safety of hardware operations.
+本项目采用 `no_std` 设计，完全适用于裸机和嵌入式环境，特别针对 U-Boot 引导加载程序环境进行了优化。通过类型安全的寄存器访问，确保了硬件操作的可靠性和安全性。
 
-## ✨ Features
+## ✨ 功能特性
 
-- 🧠 **Complete MMC/eMMC Support**: Supports eMMC 4.x/5.x standards, including high-speed mode, DDR mode, HS200, and HS400 modes
-- 💳 **SD/SDIO Support**: Supports SD 1.0/2.0 standards and SDIO devices
-- 🚀 **Multiple Data Transfer Modes**: Supports both PIO and DMA data transfer modes
-- 🏔 **Rockchip Platform Optimization**: Specifically optimized for the RK3568 platform, supporting DWCMSHC controller
-- 🔒 **Type-Safe Register Access**: Provides type-safe hardware register operations based on direct memory access
-- 📦 **no_std Compatible**: Completely independent of the standard library, suitable for bare-metal and embedded environments
-- ⚡ **ARM64 Architecture Optimization**: Specifically optimized for ARM64 platforms
-- 🖥 **U-Boot Environment Support**: Provides stable and reliable storage access functionality in the U-Boot bootloader environment
+- 🧠 **完整的 MMC/eMMC 支持**: 支持 eMMC 4.x/5.x 标准，包括高速模式、DDR 模式、HS200 和 HS400 模式
+- 💳 **SD/SDIO 支持**: 支持 SD 1.0/2.0 标准和 SDIO 设备
+- 🚀 **多种数据传输模式**: 支持 PIO 和 DMA 两种数据传输模式
+- 🏔 **Rockchip 平台优化**: 针对 RK3568 平台进行了专门优化，支持 DWCMSHC 控制器
+- 🔒 **类型安全寄存器访问**: 基于直接内存访问提供类型安全的硬件寄存器操作
+- 📦 **no_std 兼容**: 完全不依赖标准库，适用于裸机和嵌入式环境
+- ⚡ **ARM64 架构优化**: 专门针对 ARM64 平台进行优化
+- 🖥 **U-Boot 环境支持**: 在 U-Boot 引导环境下提供稳定可靠的存储访问功能
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### 🛠 Requirements
+### 🛠 环境要求
 
 - Rust 2024 Edition
-- ARM64 development environment
-- Rockchip RK3568 hardware platform with U-Boot support
-- ostool tool (for testing)
+- ARM64 开发环境
+- 支持 U-Boot 的 Rockchip RK3568 硬件平台
+- ostool 工具 (用于测试)
 
-### 📦 Installation
+### 📦 安装步骤
 
-1. Install the `ostool` dependency:
+1. 安装 `ostool` 依赖工具：
 
 ```bash
 cargo install ostool
 ```
 
-2. Add the project to `Cargo.toml`:
+2. 将项目添加到 `Cargo.toml`：
 
 ```toml
 [dependencies]
 sdmmc = "0.1.0"
 ```
 
-### 📝 Basic Usage
+### 📝 基本使用
 
 ```rust
 use sdmmc::emmc::EMmcHost;
 use core::ptr::NonNull;
 
-// Create EMMC controller instance
-let emmc_addr = 0xfe2e0000; // RK3568 EMMC controller base address
+// 创建 EMMC 控制器实例
+let emmc_addr = 0xfe2e0000; // RK3568 EMMC 控制器基地址
 let mut emmc = EMmcHost::new(emmc_addr);
 
-// Initialize controller and storage card
+// 初始化控制器和存储卡
 match emmc.init() {
     Ok(_) => {
-        println!("EMMC initialized successfully");
+        println!("EMMC 初始化成功");
         
-        // Read storage card information
+        // 读取存储卡信息
         match emmc.get_card_info() {
             Ok(card_info) => {
-                println!("Card type: {:?}", card_info.card_type);
-                println!("Capacity: {} MB", card_info.capacity_bytes / (1024 * 1024));
+                println!("卡类型: {:?}", card_info.card_type);
+                println!("容量: {} MB", card_info.capacity_bytes / (1024 * 1024));
             }
-            Err(e) => println!("Failed to get card info: {:?}", e),
+            Err(e) => println!("获取卡信息失败: {:?}", e),
         }
         
-        // Read data block
+        // 读取数据块
         let mut buffer: [u8; 512] = [0; 512];
         match emmc.read_blocks(0, 1, &mut buffer) {
-            Ok(_) => println!("Read data block successfully"),
-            Err(e) => println!("Failed to read data block: {:?}", e),
+            Ok(_) => println!("读取数据块成功"),
+            Err(e) => println!("读取数据块失败: {:?}", e),
         }
     }
-    Err(e) => println!("EMMC initialization failed: {:?}", e),
+    Err(e) => println!("EMMC 初始化失败: {:?}", e),
 }
 ```
 
-## 📁 Project Structure
+## 📁 项目结构
 
 ```
 src/
-├── lib.rs              # Main entry and core functionality
-├── err.rs              # Error type definitions
+├── lib.rs              # 主入口和核心功能
+├── err.rs              # 错误类型定义
 └── emmc/
-    ├── mod.rs          # EMMC module main file
-    ├── cmd.rs          # Command sending and response handling
-    ├── block.rs        # Block read/write operations
-    ├── regs.rs         # Register access interface
-    ├── constant.rs     # Hardware constant definitions
-    ├── clock.rs        # Clock control interface
-    ├── rockchip.rs     # Rockchip platform-specific implementation
-    ├── config.rs       # Platform configuration
-    ├── aux.rs          # Auxiliary functions
-    └── info.rs         # Card information handling
+    ├── mod.rs          # EMMC 模块主文件
+    ├── cmd.rs          # 命令发送和响应处理
+    ├── block.rs        # 块读写操作
+    ├── regs.rs         # 寄存器访问接口
+    ├── constant.rs     # 硬件常量定义
+    ├── clock.rs        # 时钟控制接口
+    ├── rockchip.rs     # Rockchip 平台特定实现
+    ├── config.rs       # 平台配置
+    ├── aux.rs          # 辅助函数
+    └── info.rs         # 卡信息处理
 
 tests/
-└── test.rs             # Integration tests, including EMMC functionality tests
+└── test.rs             # 集成测试，包含 EMMC 功能测试
 ```
 
-## 📚 API Documentation
+## 📚 API 文档
 
-### 🧱 Core Structures
+### 🧱 核心结构体
 
-| Structure | Description |
-|-----------|-------------|
-| **`EMmcHost`** | Main EMMC controller interface structure, providing all storage control functionality |
-| **`EMmcCard`** | Storage card information structure, containing detailed card information |
+| 结构体 | 描述 |
+|--------|------|
+| **`EMmcHost`** | 主要的 EMMC 控制器接口结构体，提供所有存储控制功能 |
+| **`EMmcCard`** | 存储卡信息结构体，包含卡的详细信息 |
 
-### 🔧 Main Interfaces
+### 🔧 主要接口
 
-#### 🎛 EMMC Controller Management
+#### 🎛 EMMC 控制器管理
 
-| Method | Description |
-|--------|-------------|
-| `EMmcHost::new(addr)` | Create new EMMC controller instance |
-| `EMmcHost::init()` | Initialize EMMC controller and storage card |
-| `EMmcHost::get_card_info()` | Get storage card information |
-| `EMmcHost::get_status()` | Get controller status |
+| 方法 | 描述 |
+|------|------|
+| `EMmcHost::new(addr)` | 创建新的 EMMC 控制器实例 |
+| `EMmcHost::init()` | 初始化 EMMC 控制器和存储卡 |
+| `EMmcHost::get_card_info()` | 获取存储卡信息 |
+| `EMmcHost::get_status()` | 获取控制器状态 |
 
-#### 💾 Data Read/Write Operations
+#### 💾 数据读写操作
 
-| Method | Description |
-|--------|-------------|
-| `EMmcHost::read_blocks(block_id, blocks, buffer)` | Read data blocks |
-| `EMmcHost::write_blocks(block_id, blocks, buffer)` | Write data blocks |
+| 方法 | 描述 |
+|------|------|
+| `EMmcHost::read_blocks(block_id, blocks, buffer)` | 读取数据块 |
+| `EMmcHost::write_blocks(block_id, blocks, buffer)` | 写入数据块 |
 
-#### ⏱ Clock and Bus Control
+#### ⏱ 时钟和总线控制
 
-| Method | Description |
-|--------|-------------|
-| `EMmcHost::mmc_set_clock(freq)` | Set clock frequency |
-| `EMmcHost::mmc_set_bus_width(width)` | Set bus width |
-| `EMmcHost::mmc_set_timing(timing)` | Set timing mode |
+| 方法 | 描述 |
+|------|------|
+| `EMmcHost::mmc_set_clock(freq)` | 设置时钟频率 |
+| `EMmcHost::mmc_set_bus_width(width)` | 设置总线宽度 |
+| `EMmcHost::mmc_set_timing(timing)` | 设置时序模式 |
 
-### 🔄 Supported Transfer Modes
+### 🔄 支持的传输模式
 
-| Mode | Description |
-|------|-------------|
-| **PIO Mode** | Enabled by default, suitable for small data transfers |
-| **DMA Mode** | Enabled via `dma` feature, suitable for large data transfers |
+| 模式 | 描述 |
+|------|------|
+| **PIO 模式** | 默认启用，适用于小数据量传输 |
+| **DMA 模式** | 通过 `dma` feature 启用，适用于大数据量传输 |
 
-## 💡 Usage Examples
+## 💡 使用示例
 
-### 🔧 EMMC Initialization Example
+### 🔧 EMMC 初始化示例
 
 ```rust
 use sdmmc::emmc::EMmcHost;
 use core::ptr::NonNull;
 
 fn init_emmc_controller(emmc_addr: usize) -> Result<(), &'static str> {
-    // Create EMMC controller instance
+    // 创建 EMMC 控制器实例
     let mut emmc = EMmcHost::new(emmc_addr);
     
-    // Initialize controller
+    // 初始化控制器
     match emmc.init() {
         Ok(_) => {
-            println!("EMMC controller initialized successfully");
+            println!("EMMC 控制器初始化成功");
             
-            // Get card information
+            // 获取卡信息
             match emmc.get_card_info() {
                 Ok(card_info) => {
-                    println!("Card type: {:?}", card_info.card_type);
-                    println!("Manufacturer ID: 0x{:02X}", card_info.manufacturer_id);
-                    println!("Capacity: {} MB", card_info.capacity_bytes / (1024 * 1024));
-                    println!("Block size: {} bytes", card_info.block_size);
+                    println!("卡类型: {:?}", card_info.card_type);
+                    println!("制造商 ID: 0x{:02X}", card_info.manufacturer_id);
+                    println!("容量: {} MB", card_info.capacity_bytes / (1024 * 1024));
+                    println!("块大小: {} 字节", card_info.block_size);
                 }
                 Err(e) => {
-                    println!("Failed to get card information: {:?}", e);
-                    return Err("Failed to get card information");
+                    println!("获取卡信息失败: {:?}", e);
+                    return Err("获取卡信息失败");
                 }
             }
             
             Ok(())
         }
         Err(e) => {
-            println!("EMMC controller initialization failed: {:?}", e);
-            Err("Controller initialization failed")
+            println!("EMMC 控制器初始化失败: {:?}", e);
+            Err("控制器初始化失败")
         }
     }
 }
 ```
 
-### 💾 Data Read/Write Example
+### 💾 数据读写示例
 
 ```rust
 use sdmmc::emmc::EMmcHost;
 
 fn read_write_test(emmc: &mut EMmcHost) -> Result<(), &'static str> {
-    // Read first data block
+    // 读取第一个数据块
     let mut read_buffer: [u8; 512] = [0; 512];
     match emmc.read_blocks(0, 1, &mut read_buffer) {
         Ok(_) => {
-            println!("Read data block successfully");
-            println!("First 16 bytes: {:02X?}", &read_buffer[0..16]);
+            println!("读取数据块成功");
+            println!("前 16 字节: {:02X?}", &read_buffer[0..16]);
         }
         Err(e) => {
-            println!("Failed to read data block: {:?}", e);
-            return Err("Read failed");
+            println!("读取数据块失败: {:?}", e);
+            return Err("读取失败");
         }
     }
     
-    // Write test data to third data block
+    // 写入测试数据到第三个数据块
     let mut write_buffer: [u8; 512] = [0; 512];
-    // Fill test data
+    // 填充测试数据
     for i in 0..512 {
         write_buffer[i] = (i % 256) as u8;
     }
     
     match emmc.write_blocks(2, 1, &write_buffer) {
-        Ok(_) => println!("Write data block successfully"),
+        Ok(_) => println!("写入数据块成功"),
         Err(e) => {
-            println!("Failed to write data block: {:?}", e);
-            return Err("Write failed");
+            println!("写入数据块失败: {:?}", e);
+            return Err("写入失败");
         }
     }
     
-    // Read back for verification
+    // 读回验证
     let mut verify_buffer: [u8; 512] = [0; 512];
     match emmc.read_blocks(2, 1, &mut verify_buffer) {
         Ok(_) => {
-            // Verify data consistency
+            // 验证数据一致性
             let mut data_match = true;
             for i in 0..512 {
                 if write_buffer[i] != verify_buffer[i] {
@@ -256,15 +256,15 @@ fn read_write_test(emmc: &mut EMmcHost) -> Result<(), &'static str> {
             }
             
             if data_match {
-                println!("Data verification successful");
+                println!("数据验证成功");
             } else {
-                println!("Data verification failed");
-                return Err("Data verification failed");
+                println!("数据验证失败");
+                return Err("数据验证失败");
             }
         }
         Err(e) => {
-            println!("Verification read failed: {:?}", e);
-            return Err("Verification failed");
+            println!("验证读取失败: {:?}", e);
+            return Err("验证失败");
         }
     }
     
@@ -272,86 +272,86 @@ fn read_write_test(emmc: &mut EMmcHost) -> Result<(), &'static str> {
 }
 ```
 
-### 🎯 Complete Usage Example
+### 🎯 完整使用示例
 
 ```rust
 use sdmmc::emmc::EMmcHost;
 use core::ptr::NonNull;
 
 fn main() -> Result<(), &'static str> {
-    // EMMC controller base address (RK3568)
+    // EMMC 控制器基地址 (RK3568)
     let emmc_addr = 0xfe2e0000;
     
-    // Create controller instance
+    // 创建控制器实例
     let mut emmc = EMmcHost::new(emmc_addr);
     
-    // Initialize controller
-    println!("Initializing EMMC controller...");
+    // 初始化控制器
+    println!("初始化 EMMC 控制器...");
     if let Err(e) = emmc.init() {
-        println!("EMMC controller initialization failed: {:?}", e);
-        return Err("Initialization failed");
+        println!("EMMC 控制器初始化失败: {:?}", e);
+        return Err("初始化失败");
     }
     
-    // Get card information
-    println!("Getting storage card information...");
+    // 获取卡信息
+    println!("获取存储卡信息...");
     match emmc.get_card_info() {
         Ok(card_info) => {
-            println!("Card type: {:?}", card_info.card_type);
-            println!("Manufacturer ID: 0x{:02X}", card_info.manufacturer_id);
-            println!("Capacity: {} MB", card_info.capacity_bytes / (1024 * 1024));
-            println!("Block size: {} bytes", card_info.block_size);
+            println!("卡类型: {:?}", card_info.card_type);
+            println!("制造商 ID: 0x{:02X}", card_info.manufacturer_id);
+            println!("容量: {} MB", card_info.capacity_bytes / (1024 * 1024));
+            println!("块大小: {} 字节", card_info.block_size);
         }
         Err(e) => {
-            println!("Failed to get card information: {:?}", e);
-            return Err("Failed to get card information");
+            println!("获取卡信息失败: {:?}", e);
+            return Err("获取卡信息失败");
         }
     }
     
-    // Execute read/write test
-    println!("Executing read/write test...");
+    // 执行读写测试
+    println!("执行读写测试...");
     if let Err(e) = read_write_test(&mut emmc) {
-        println!("Read/write test failed: {}", e);
+        println!("读写测试失败: {}", e);
         return Err(e);
     }
     
-    println!("All tests completed");
+    println!("所有测试完成");
     Ok(())
 }
 
 fn read_write_test(emmc: &mut EMmcHost) -> Result<(), &'static str> {
-    // Read first data block
+    // 读取第一个数据块
     let mut read_buffer: [u8; 512] = [0; 512];
     match emmc.read_blocks(0, 1, &mut read_buffer) {
         Ok(_) => {
-            println!("Read data block successfully");
-            println!("First 16 bytes: {:02X?}", &read_buffer[0..16]);
+            println!("读取数据块成功");
+            println!("前 16 字节: {:02X?}", &read_buffer[0..16]);
         }
         Err(e) => {
-            println!("Failed to read data block: {:?}", e);
-            return Err("Read failed");
+            println!("读取数据块失败: {:?}", e);
+            return Err("读取失败");
         }
     }
     
-    // Write test data to third data block
+    // 写入测试数据到第三个数据块
     let mut write_buffer: [u8; 512] = [0; 512];
-    // Fill test data
+    // 填充测试数据
     for i in 0..512 {
         write_buffer[i] = (i % 256) as u8;
     }
     
     match emmc.write_blocks(2, 1, &write_buffer) {
-        Ok(_) => println!("Write data block successfully"),
+        Ok(_) => println!("写入数据块成功"),
         Err(e) => {
-            println!("Failed to write data block: {:?}", e);
-            return Err("Write failed");
+            println!("写入数据块失败: {:?}", e);
+            return Err("写入失败");
         }
     }
     
-    // Read back for verification
+    // 读回验证
     let mut verify_buffer: [u8; 512] = [0; 512];
     match emmc.read_blocks(2, 1, &mut verify_buffer) {
         Ok(_) => {
-            // Verify data consistency
+            // 验证数据一致性
             let mut data_match = true;
             for i in 0..512 {
                 if write_buffer[i] != verify_buffer[i] {
@@ -361,15 +361,15 @@ fn read_write_test(emmc: &mut EMmcHost) -> Result<(), &'static str> {
             }
             
             if data_match {
-                println!("Data verification successful");
+                println!("数据验证成功");
             } else {
-                println!("Data verification failed");
-                return Err("Data verification failed");
+                println!("数据验证失败");
+                return Err("数据验证失败");
             }
         }
         Err(e) => {
-            println!("Verification read failed: {:?}", e);
-            return Err("Verification failed");
+            println!("验证读取失败: {:?}", e);
+            return Err("验证失败");
         }
     }
     
@@ -377,21 +377,21 @@ fn read_write_test(emmc: &mut EMmcHost) -> Result<(), &'static str> {
 }
 ```
 
-## 🧪 Test Results
+## 🧪 测试结果
 
-### ▶️ Running Tests
+### ▶️ 运行测试
 
-#### 🔌 Hardware Testing with U-Boot Environment
+#### 🔌 带U-Boot环境的硬件测试
 
 ```bash
-# Board testing with u-boot
+# 带uboot的开发板测试
 make uboot
 ```
 
-### Test Output Example
+### 测试输出示例
 
 <details>
-<summary>Click to view test results</summary>
+<summary>点击查看测试结果</summary>
 
 ```
      _____                                         __
@@ -839,23 +839,23 @@ All tests passed
 
 </details>
 
-### 📋 Test Functionality Description
+### 📋 测试功能说明
 
-The test program performs the following operations:
+测试程序会执行以下操作：
 
-1. **Device Tree Parsing**: Find EMMC controller hardware node addresses from the device tree
-2. **EMMC Controller Initialization**: Initialize the DWCMSHC EMMC controller
-3. **Storage Card Detection**: Detect and initialize the connected eMMC storage card
-4. **Basic Read/Write Tests**:
-   - Read storage card information
-   - Read data blocks
-   - Write data blocks and verify
-   - Multi-block read tests
-5. **Data Consistency Verification**: Verify that written and read data match
+1. **设备树解析**: 从设备树中查找 EMMC 控制器硬件节点地址
+2. **EMMC 控制器初始化**: 初始化 DWCMSHC EMMC 控制器
+3. **存储卡检测**: 检测并初始化连接的 eMMC 存储卡
+4. **基本读写测试**:
+   - 读取存储卡信息
+   - 读取数据块
+   - 写入数据块并验证
+   - 多块读取测试
+5. **数据一致性验证**: 验证写入和读取的数据是否一致
 
-**Note**: Full testing requires ARM hardware platform support and U-Boot environment
+**注意**: 完整测试需要支持 ARM 硬件平台和 U-Boot 环境
 
 
-## 📄 License
+## 📄 许可证
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情

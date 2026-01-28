@@ -2,6 +2,14 @@
 name = "sdmmc"
 version = "0.1.0"
 edition = "2024"
+description = "A no_std SD/MMC/eMMC driver library for ARM64 platforms"
+authors = ["Zhou Rui <zrufo747@outlook.com>", "Yang Jinquan <YJQ980314@Gmail.com>"]
+readme = "README.md"
+license = "GPL-3.0-or-later OR Apache-2.0 OR MIT"
+documentation = "https://docs.rs/sdmmc"
+repository = "https://github.com/drivercraft/sdmmc"
+keywords = ["sd", "mmc", "emmc", "embedded"]
+categories = ["embedded", "hardware-support", "no-std"]
 
 [dependencies]
 fdt-parser = "0.4"
@@ -26,7 +34,7 @@ pio = []
 pcie = "0.2"
 bare-test = "0.7"
 byte-unit = { version = "5.1.6", default-features = false, features = ["byte"] }
-rk3588-clk = { git = "https://github.com/drivercraft/rk3588-clk.git" }
+rk3588-clk = "0.1.3"
 
 [build-dependencies]
 bare-test-macros = "0.2"

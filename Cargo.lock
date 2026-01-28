@@ -1199,12 +1199,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34080505efa8e45a4b816c349525ebe327ceaa8559756f0356cba97ef3bf7432"
 
 [[package]]
-name = "mbarrier"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9257ea6fe9726d1f1a67fddbda4c06cc97b4fb18716b78ec03ba05e29d625e28"
-
-[[package]]
 name = "memchr"
 version = "2.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1814,12 +1808,12 @@ dependencies = [
 
 [[package]]
 name = "rk3588-clk"
-version = "0.1.0"
-source = "git+https://github.com/drivercraft/rk3588-clk.git#f938fe2424d45b1f1f1cdd5e1f8336f79bb3e18e"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df59d8451a4f331a53fbd7c0c349cf4e844ebc051b7081342341a85910d7ac08"
 dependencies = [
  "bare-test-macros",
  "log",
- "mbarrier",
  "tock-registers 0.10.0",
 ]
 

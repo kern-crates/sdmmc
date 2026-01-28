@@ -31,21 +31,9 @@ build:
 	@cargo build --release
 	@rust-objcopy --binary-architecture=$(ARCH) ./target/$(TARGET)/release/$(APP) --strip-all -O binary $(KERNEL)
 
-# run: build disk_img
-# 	@echo "Running QEMU ....."
-# 	@qemu-system-$(ARCH) -M virt -smp 1 -cpu cortex-a72 \
-# 		-kernel ./$(KERNEL) -nographic \
-#     	-drive file=$(DISK),format=raw,if=none,id=disk \
-#     	-device sdhci-pci,id=sdhci0 \
-#     	-device sd-card,drive=disk
-
-test: 
-	@echo "Running tests" 
-	@cargo test --test test -- --show-output
-
 uboot: 
 	@echo "Running tests" 
-	@cargo test --test test -- --show-output --uboot
+	@cargo test --test test -- --show-output uboot
 
 clean:
 	@echo "Cleaning up"

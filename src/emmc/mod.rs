@@ -26,7 +26,29 @@ use dma_api::{DVec, Direction};
 use info::CardType;
 use log::{debug, info, trace};
 
-// SD Host Controller structure
+/// SD Host Controller (SDHCI) driver for EMMC cards
+///
+/// This structure manages the SDHCI controller and provides an interface to
+/// communicate with eMMC storage devices. It supports multiple features including:
+/// - High-speed modes (HS, HS200, HS400)
+/// - Multiple bus widths (1-bit, 4-bit, 8-bit)
+/// - Both PIO and DMA data transfer modes
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use sdmmc::emmc::EMmcHost;
+///
+/// // Create controller at base address
+/// let mut emmc = EMmcHost::new(0xfe2e0000);
+///
+/// // Initialize controller
+/// emmc.init().expect("Failed to initialize EMMC");
+///
+/// // Read data
+/// let mut buffer = [0u8; 512];
+/// emmc.read_blocks(0, 1, &mut buffer).expect("Read failed");
+/// ```
 #[derive(Debug)]
 pub struct EMmcHost {
     base_addr: usize,
@@ -51,6 +73,25 @@ impl Display for EMmcHost {
 }
 
 impl EMmcHost {
+    /// Create a new EMMC host controller instance
+    ///
+    /// # Arguments
+    ///
+    /// * `base_addr` - Physical base address of the SDHCI controller registers
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the base address points to valid memory-mapped
+    /// registers for an SDHCI controller.
+    ///
+    /// # Example
+    ///
+    /// ```rust,no_run
+    /// use sdmmc::emmc::EMmcHost;
+    ///
+    /// // RK3568 EMMC controller base address
+    /// let emmc = EMmcHost::new(0xfe2e0000);
+    /// ```
     pub fn new(base_addr: usize) -> Self {
         let mut host = Self {
             base_addr,
@@ -76,17 +117,34 @@ impl EMmcHost {
         host
     }
 
-    // 获取 card 的不可变引用
+    /// Get an immutable reference to the card
+    ///
+    /// Returns `None` if no card is present or initialized.
     pub fn card(&self) -> Option<&EMmcCard> {
         self.card.as_ref()
     }
 
-    // 获取 card 的可变引用
+    /// Get a mutable reference to the card
+    ///
+    /// Returns `None` if no card is present or initialized.
     pub fn card_mut(&mut self) -> Option<&mut EMmcCard> {
         self.card.as_mut()
     }
 
-    // Initialize the host controller
+    /// Initialize the host controller and connected card
+    ///
+    /// This performs the complete initialization sequence:
+    /// - Resets the controller
+    /// - Detects and initializes the card
+    /// - Sets up clock and bus parameters
+    /// - Configures high-speed modes if supported
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// - No card is detected
+    /// - Card initialization fails
+    /// - Unsupported card type
     pub fn init(&mut self) -> Result<(), SdError> {
         info!("Init EMMC Controller");
 
@@ -190,7 +248,15 @@ impl EMmcHost {
         Ok(())
     }
 
-    // Reset the controller
+    /// Reset the controller
+    ///
+    /// # Arguments
+    ///
+    /// * `mask` - Reset mask (EMMC_RESET_ALL, EMMC_RESET_CMD, EMMC_RESET_DATA)
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the reset operation times out.
     pub fn reset(&self, mask: u8) -> Result<(), SdError> {
         // Request reset
         self.write_reg8(EMMC_SOFTWARE_RESET, mask);
@@ -999,9 +1065,7 @@ impl EMmcHost {
         let mut retries = 3;
         let cmd = EMmcCommand::new(
             MMC_SWITCH,
-            (MMC_SWITCH_MODE_WRITE_BYTE << 24)
-                | (index << 16)
-                | ((value as u32) << 8),
+            (MMC_SWITCH_MODE_WRITE_BYTE << 24) | (index << 16) | ((value as u32) << 8),
             MMC_RSP_R1B,
         );
 

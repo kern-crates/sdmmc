@@ -49,6 +49,12 @@ pub struct SdResponse {
     pub raw: [u32; 4],
 }
 
+impl Default for SdResponse {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SdResponse {
     pub fn new() -> Self {
         Self { raw: [0; 4] }
@@ -60,10 +66,10 @@ impl SdResponse {
 
     pub fn as_r2(&self) -> [u32; 4] {
         let mut response = [0; 4];
-        for i in 0..4 {
-            response[i] = self.raw[3 - i] << 8;
+        for (i, item) in response.iter_mut().enumerate() {
+            *item = self.raw[3 - i] << 8;
             if i != 3 {
-                response[i] |= self.raw[3 - i - 1] >> 24;
+                *item |= self.raw[3 - i - 1] >> 24;
             }
         }
         info!(
@@ -188,10 +194,7 @@ impl EMmcHost {
 
             #[cfg(feature = "pio")]
             {
-                self.write_reg16(
-                    EMMC_BLOCK_SIZE,
-                    (cmd.block_size & 0xFFF).try_into().unwrap(),
-                );
+                self.write_reg16(EMMC_BLOCK_SIZE, cmd.block_size & 0xFFF);
                 self.write_reg16(EMMC_BLOCK_COUNT, cmd.block_count);
 
                 self.write_reg16(EMMC_XFER_MODE, mode);
@@ -607,6 +610,6 @@ impl EMmcHost {
     pub fn mmc_card_busy(&self) -> bool {
         let present_state = self.read_reg(EMMC_PRESENT_STATE);
         // 检查DATA[0]线是否为0（低电平表示忙）
-        !(present_state & EMMC_DATA_0_LVL != 0)
+        present_state & EMMC_DATA_0_LVL == 0
     }
 }
